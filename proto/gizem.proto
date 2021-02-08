@@ -1,0 +1,58 @@
+//protoc --dart_out=grpc:lib/  proto/gizem.proto
+
+syntax = "proto3";
+package gizem;
+
+service Authentication {
+    rpc Login (AuthenticationQ) returns (AuthenticationP);
+}
+
+message AuthenticationQ {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticationP {
+  string  token     = 1;
+}
+
+service WebRTCSignal {
+  rpc SubscribeSessionInfoUpdate (SessionInfoUpdateQ) returns (stream SessionInfoUpdateP);
+  rpc SendMessage (SendMessageQ) returns (stream SendMessageP);
+}
+
+
+message SessionInfoUpdateQ {
+  string session_id  = 1;
+  
+}
+
+message SessionInfoUpdateP {
+  repeated string peers     = 1;
+}
+
+message SendMessageQ {
+  string message  = 1;
+
+}
+
+message SendMessageP {
+  
+}
+service UserList {
+  rpc SubscribeListUpdate (SubscribeListUpdateQ) returns (stream SubscribeListUpdateP);
+}
+message UserInfo {
+    string userid  = 1;
+    string username  = 2;
+}
+
+message SubscribeListUpdateQ {
+  
+}
+message SubscribeListUpdateP {
+    
+  repeated UserInfo user  = 1;
+}
+
+

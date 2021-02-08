@@ -1,0 +1,25 @@
+name: gizem_client
+description: A new Flutter application.
+version: 1.0.1
+
+environment:
+  sdk: ">=2.2.2 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^4.3.3
+  grpc: ^2.9.0
+  protobuf: ^1.1.0
+  cupertino_icons: ^1.0.0
+  flutter_webrtc: ^0.5.7
+  shared_preferences: ^0.5.12
+  http: ^0.12.1
+  path_provider: ^1.6.24
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

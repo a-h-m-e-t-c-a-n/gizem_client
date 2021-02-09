@@ -25,8 +25,7 @@ class UserList with ChangeNotifier {
     notifyListeners();
 
     var userlistservice = await service.buildUserListClient();
-    var responseStream =
-        userlistservice.subscribeListUpdate(SubscribeListUpdateQ());
+    var responseStream = userlistservice.subscribe(EmptyRequest());
 
     subscription = responseStream.listen((userUpdate) {
       users = userUpdate.user.map((data) {

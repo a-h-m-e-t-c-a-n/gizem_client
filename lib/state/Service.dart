@@ -27,6 +27,13 @@ class AuthInterceptors extends ClientInterceptor {
 class Service with ChangeNotifier {
   final Object host;
   final int port;
+  bool _isConnected;
+
+  bool get isConnected => _isConnected;
+  void set(bool state) {
+    _isConnected = state;
+    notifyListeners();
+  }
 
   bool isAuthenticated = false;
 
@@ -57,7 +64,7 @@ class Service with ChangeNotifier {
       var client = AuthenticationClient(await _buildChannel(),
           options: CallOptions(timeout: Duration(seconds: 30)));
       var result = await client.login(
-        new AuthenticationQ()
+        new AuthenticationInfo()
           ..username = username
           ..password = password,
       );
@@ -81,7 +88,7 @@ class Service with ChangeNotifier {
     }
   }
 
-  buildWebRTCSignal() async {
+  Future<WebRTCSignalClient> buildWebRTCSignal() async {
     var channel = await _buildChannel();
     channel
         .getConnection()

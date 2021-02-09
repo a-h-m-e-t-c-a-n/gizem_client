@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'proto/gizem.pb.dart';
-import 'proto/gizem.pbgrpc.dart';
 import 'package:grpc/grpc.dart';
+
+import 'proto/models.pb.dart';
+import 'proto/services.pbgrpc.dart';
 
 class AuthInterceptors extends ClientInterceptor {
   String _token = "";
@@ -48,7 +49,7 @@ class GizemService {
   static Future Login(String username, String password) async {
     try {
       var client = AuthenticationClient(_buildChannel1());
-      var result = await client.login(new AuthenticationQ()
+      var result = await client.login(new AuthenticationInfo()
         ..username = username
         ..password = password);
 

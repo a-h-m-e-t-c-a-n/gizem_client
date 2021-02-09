@@ -1,21 +1,46 @@
 import 'package:flutter/material.dart';
 import 'dart:core';
-import 'signaling.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-class CallSample extends StatefulWidget {
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'state/lib.dart' as states;
+import 'package:async/async.dart';
+import 'package:provider/provider.dart';
+
+import 'state/lib.dart';
+
+class VideoCallWidget extends StatefulWidget {
   static String tag = 'call_sample';
 
   final String host;
 
-  CallSample({Key key, @required this.host}) : super(key: key);
+  VideoCallWidget({Key key, @required this.host}) : super(key: key);
 
   @override
-  _CallSampleState createState() => _CallSampleState();
+  _VideoCallWidget createState() => _VideoCallWidget();
 }
 
-class _CallSampleState extends State<CallSample> {
-  Signaling _signaling;
+class _VideoCallWidget extends State<VideoCallWidget> {
+  states.Signaling model;
+  CancelableOperation initJob;
+
+  @override
+  void initState() {
+    model = states.Signaling(context.read());
+
+    initJob = CancelableOperation.fromFuture(init());
+  }
+
+  Future init() async {
+    super.initState();
+    initRenderers();
+    await model.subscribe();
+  }
+
+  initRenderers() async {
+    await _localRenderer.initialize();
+    await _remoteRenderer.initialize();
+  }
+
   List<dynamic> _peers;
   var _selfId;
   RTCVideoRenderer _localRenderer = RTCVideoRenderer();
@@ -24,32 +49,23 @@ class _CallSampleState extends State<CallSample> {
   Session _session;
 
   // ignore: unused_element
-  _CallSampleState({Key key});
-
-  @override
-  initState() {
-    super.initState();
-    initRenderers();
-    _connect();
-  }
-
-  initRenderers() async {
-    await _localRenderer.initialize();
-    await _remoteRenderer.initialize();
-  }
+  _VideoCallWidget({Key key});
 
   @override
   deactivate() {
     super.deactivate();
-    if (_signaling != null) _signaling.close();
     _localRenderer.dispose();
     _remoteRenderer.dispose();
+    try {
+      model.dispose();
+    } catch (ex) {
+      print("warning:$ex");
+    }
+    initJob.cancel();
   }
 
-  void _connect() async {
-    if (_signaling == null) {
-      _signaling = Signaling(widget.host)..connect();
-
+  //void _subscribe() async {
+  /*if (_signaling == null) {
       _signaling.onSignalingStateChange = (SignalingState state) {
         switch (state) {
           case SignalingState.ConnectionClosed:
@@ -57,9 +73,9 @@ class _CallSampleState extends State<CallSample> {
           case SignalingState.ConnectionOpen:
             break;
         }
-      };
+      };*/
 
-      _signaling.onCallStateChange = (Session session, CallState state) {
+  /* _signaling.onCallStateChange = (Session session, CallState state) {
         switch (state) {
           case CallState.CallStateNew:
             setState(() {
@@ -79,9 +95,9 @@ class _CallSampleState extends State<CallSample> {
           case CallState.CallStateConnected:
           case CallState.CallStateRinging:
         }
-      };
+      };*/
 
-      _signaling.onPeersUpdate = ((event) {
+  /* _signaling.onPeersUpdate = ((event) {
         setState(() {
           _selfId = event['self'];
           _peers = event['peers'];
@@ -100,26 +116,22 @@ class _CallSampleState extends State<CallSample> {
         _remoteRenderer.srcObject = null;
       });
     }
-  }
+  }*/
 
   _invitePeer(BuildContext context, String peerId, bool useScreen) async {
-    if (_signaling != null && peerId != _selfId) {
-      _signaling.invite(peerId, 'video', useScreen);
-    }
+    model.invite(peerId, 'video', useScreen);
   }
 
   _hangUp() {
-    if (_signaling != null) {
-      _signaling.bye(_session.sid);
-    }
+    model.bye(_session.sid);
   }
 
   _switchCamera() {
-    _signaling.switchCamera();
+    model.switchCamera();
   }
 
   _muteMic() {
-    _signaling.muteMic();
+    model.muteMic();
   }
 
   _buildRow(context, peer) {
